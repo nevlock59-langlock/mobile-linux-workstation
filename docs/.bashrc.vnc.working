@@ -1,0 +1,68 @@
+# Python
+export PYTHONSTARTUP=~/.pythonstartup
+
+# Language and Locale settings
+export LANG=ko_KR.UTF-8
+export LC_MONETARY=ko_KR.UTF-8
+export LC_PAPER=ko_KR.UTF-8
+export LC_NAME=ko_KR.UTF-8
+export LC_ADDRESS=ko_KR.UTF-8
+export LC_TELEPHONE=ko_KR.UTF-8
+export LC_MEASUREMENT=ko_KR.UTF-8
+export LC_IDENTIFICATION=ko_KR.UTF-8
+
+# XDG configuration directory
+export XDG_CONFIG_HOME=~/.config
+
+# Start VNC server if not already running
+bash ~/vnc_restart.sh
+alias thunar='thunar ~/storage/shared'
+
+# Start SSH server if not already running
+pgrep sshd > /dev/null || sshd
+
+
+restartvnc() {
+  vncserver -kill :1 2>/dev/null || true
+
+  mkdir -p "$PREFIX/share/X11"
+
+  if [ ! -L "$PREFIX/share/X11/xkb" ]; then
+    rm -rf "$PREFIX/share/X11/xkb"
+    ln -s "$PREFIX/share/xkeyboard-config-2" "$PREFIX/share/X11/xkb"
+  fi
+
+  rm -f "$PREFIX/tmp/.X1-lock"
+  rm -rf "$PREFIX/tmp/.X11-unix/X1"
+
+  vncserver :1 -geometry 1280x720 -depth 24
+}
+
+alias rvnc='restartvnc'
+echo "VNC Server: restartvnc() // or simply, rvnc"
+
+alias gem='cd ~/workbox && gemini'
+echo "Gemini Cli: cd ~/workbox && gemini // or simply, gem"
+
+# --- VNC quick control ---
+restartvnc() {
+  termux-wake-lock
+  export XKB_CONFIG_ROOT=$PREFIX/share/X11/xkb
+
+  vncserver -kill :1 2>/dev/null
+  rm -f "$PREFIX/tmp/.X1-lock"
+  rm -rf "$PREFIX/tmp/.X11-unix/X1"
+
+  vncserver :1 -localhost yes -geometry 1280x720 -depth 24 -dpi 96
+  vncserver -list
+}
+
+stopvnc() {
+  vncserver -kill :1 2>/dev/null
+  termux-wake-unlock
+}
+
+alias rvnc='restartvnc'
+alias svnc='stopvnc'
+# --- VNC quick control end ---
+
