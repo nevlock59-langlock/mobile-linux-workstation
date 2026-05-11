@@ -1,0 +1,1 @@
+Linux localhost 5.15.178-android13-8-31998796-abS911NKSS7EZCI #1 SMP PREEMPT Mon Mar 30 02:12:06 UTC 2026 aarch64 Android
