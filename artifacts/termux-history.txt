@@ -1,0 +1,1240 @@
+  923  python - <<'PY'
+from pathlib import Path
+
+p = Path("src/App.tsx")
+s = p.read_text()
+
+s = s.replace(
+'''function extractJson(text: string) { const cleaned = text .replace(/```json/g, "") .replace(/```/g, "") .trim(); const start = cleaned.indexOf("{"); const end = cleaned.lastIndexOf("}"); if (start === -1 || end === -1 || end <= start) { throw new Error("JSON 객체를 찾지 못했습니다."); } return cleaned.slice(start, end + 1); } ''',
+''
+)
+
+s = s.replace(
+'const parsed = JSON.parse(extractJson(resultText)) as GenerationResult;',
+'const parsed = JSON.parse(resultText) as GenerationResult;'
+)
+
+p.write_text(s)
+print("deleted extractJson patch")
+PY
+
+  924  git add src/App.tsx
+  925  git commit -m "Remove broken JSON extraction patch"
+  926  git push
+  927  python - <<'PY'
+from pathlib import Path
+import re
+
+p = Path("src/App.tsx")
+s = p.read_text()
+
+s = re.sub(
+    r'function extractJson\(text: string\) \{.*?return cleaned\.slice\(start, end \+ 1\); \}',
+    '',
+    s,
+    count=1
+)
+
+s = s.replace(
+    'const parsed = JSON.parse(extractJson(resultText)) as GenerationResult;',
+    'const parsed = JSON.parse(resultText) as GenerationResult;'
+)
+
+p.write_text(s)
+print("extractJson removed")
+PY
+
+  928  grep -n "extractJson" src/App.tsx
+  929  python - <<'PY'
+from pathlib import Path
+import re
+
+p = Path("src/App.tsx")
+s = p.read_text(encoding="utf-8")
+
+# extractJson 함수 전체 삭제
+s = re.sub(
+    r'\nfunction extractJson\(text: string\) \{[\s\S]*?\n\}',
+    '',
+    s,
+    count=1
+)
+
+# 호출부 원복
+s = s.replace(
+    'JSON.parse(extractJson(resultText))',
+    'JSON.parse(resultText)'
+)
+
+p.write_text(s, encoding="utf-8")
+print("done")
+PY
+
+  930  grep -n "extractJson" src/App.tsx
+  931  git add src/App.tsx
+  932  git commit -m "Remove extractJson parser"
+  933  git push
+  934  grep -Rni "MVP\|최소\|다운스코프\|추후\|불필요한 기능\|핵심 기능" .
+  935  grep -Rni --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=dist "MVP\|최소\|다운스코프\|추후\|불필요한 기능\|핵심 기능" .
+  936  python - <<'PY'
+from pathlib import Path
+
+p = Path("src/App.tsx")
+s = p.read_text(encoding="utf-8")
+
+old = """- 최소 기능 제품(MVP)부터 시작하라고 명시
+- 과잉 엔지니어링을 하지 말고 불필요한 기능을 추가하지 말라고 명시"""
+
+new = """- MVP는 기능 축소가 아니라 핵심 사용자 가치를 가장 작은 단위로 구현하는 것이라고 명시
+- 단순 CRUD/폼 입력 수준으로 과도하게 다운스코프하지 말라고 명시
+- 기술 복잡도는 줄여도 앱의 존재 이유가 되는 핵심 경험은 유지하라고 명시
+- “추후 구현 가능”이라는 이유로 핵심 기능을 미루지 말라고 명시
+- 과잉 엔지니어링은 피하되, 사용자 가치까지 제거하지 말라고 명시"""
+
+if old not in s:
+    raise SystemExit("old text not found")
+
+s = s.replace(old, new, 1)
+p.write_text(s, encoding="utf-8")
+print("MVP prompt patched")
+PY
+
+  937  git add src/App.tsx
+  938  git commit -m "Refine MVP prompt guidance"
+  939  git push
+  940  git checkout -- src/App.tsx
+  941  git revert HEAD
+  942  git push
+  943  git reset --hard HEAD~2
+  944  git push --force-with-lease
+  945  git reset --hard HEAD~2
+  946  git push --force-with-lease
+  947  git log --oneline -5
+  948  git reset --hard f61e5497e6688a49a466b2f9b41fbe063df0c6de
+  949  git push --force-with-lease
+  950  git checkout -b fix-mvp-guidance
+  951  python - <<'PY'
+from pathlib import Path
+
+p = Path("PROMPTS.md")
+s = p.read_text(encoding="utf-8")
+
+add = """
+
+## MVP 범위 설정 원칙
+
+MVP는 기능을 무조건 줄이는 것이 아니라, 사용자가 핵심 가치를 체감할 수 있는 최소 경험 단위를 의미한다.
+
+- 단순 CRUD/폼 입력 수준으로 과도하게 다운스코프하지 않는다.
+- 기술 복잡도는 줄여도 앱의 존재 이유가 되는 핵심 경험은 유지한다.
+- “추후 구현 가능”이라는 이유로 핵심 기능을 미루지 않는다.
+- 과잉 엔지니어링은 피하되, 사용자 가치까지 제거하지 않는다.
+"""
+
+if "## MVP 범위 설정 원칙" not in s:
+    p.write_text(s.rstrip() + add + "\n", encoding="utf-8")
+    print("PROMPTS.md updated")
+else:
+    print("already exists")
+PY
+
+  952  find . -iname "*prompt*"
+  953  ls
+  954  python - <<'PY'
+from pathlib import Path
+
+p = Path("src/App.tsx")
+s = p.read_text(encoding="utf-8")
+
+s = s.replace(
+    "최소 기능 제품(MVP)부터 시작하라고 명시",
+    "MVP는 핵심 사용자 가치를 유지한 최소 경험 단위라고 명시"
+)
+
+s = s.replace(
+    "과잉 엔지니어링을 하지 말고 불필요한 기능을 추가하지 말라고 명시",
+    "과잉 엔지니어링은 피하되 단순 CRUD 수준으로 과도하게 다운스코프하지 말라고 명시"
+)
+
+p.write_text(s, encoding="utf-8")
+print("patched App.tsx prompt safely")
+PY
+
+  955  git diff -- src/App.tsx
+  956  npm run build
+  957  git add src/App.tsx
+  958  git commit -m "Refine generated prompt MVP guidance"
+  959  git push origin fix-mvp-guidance
+  960  cd ..
+  961  cd ~/workbox
+  962  git clone https://github.com/너의아이디/mobile-ai-coding-workstation.git
+  963  cd mobile-ai-coding-workstation
+  964  gemini
+  965  cat > README.md <<'EOF'
+# 안드로이드 폰으로 AI 코딩 작업대 만들기
+
+> Android Phone as an AI Coding Workstation  
+> Termux + Gemini CLI + GitHub + Vercel 모바일 개발환경 온보딩 가이드
+
+이 문서는 안드로이드 스마트폰에서 Termux, Gemini CLI, GitHub, Vercel을 연결해  
+가벼운 모바일 AI 코딩 워크플로를 만드는 과정을 정리한 온보딩 가이드입니다.
+
+단순 설치법이라기보다,  
+“폰 하나로 작은 웹 프로젝트를 수정하고, 확인하고, 배포하는 루프”를 만드는 데 초점을 둡니다.
+
+---
+
+## Who is this for?
+
+이 문서는 이런 사람에게 적합합니다.
+
+- Gemini CLI를 처음 써보는 사람
+- Termux에서 개발환경을 만들어보고 싶은 사람
+- 노트북 없이 모바일에서 작은 웹 프로젝트를 수정해보고 싶은 사람
+- GitHub와 Vercel을 연결해 자동 배포 흐름을 경험해보고 싶은 사람
+- AI coding agent를 실제 작업 루프로 써보고 싶은 사람
+
+---
+
+## Tested Environment
+
+제가 테스트한 환경은 다음과 같습니다.
+
+- Device: Samsung Galaxy S23
+- OS: Android
+- Terminal: Termux
+- AI Coding Agent: Gemini CLI
+- Version Control: Git / GitHub
+- Deploy: Vercel
+- Frontend Example: Vite + React
+
+---
+
+## Overall Workflow
+
+전체 흐름은 다음과 같습니다.
+
+```text
+Android Phone
+  ↓
+Termux
+  ↓
+Gemini CLI
+  ↓
+Local Project
+  ↓
+Git / GitHub
+  ↓
+Vercel
+  ↓
+Mobile Browser QA
+
+  966  cat > README.md <<'EOF'
+# 안드로이드 폰으로 AI 코딩 작업대 만들기
+
+> Android Phone as an AI Coding Workstation  
+> Termux + Gemini CLI + GitHub + Vercel 모바일 개발환경 온보딩 가이드
+
+이 문서는 안드로이드 스마트폰에서 Termux, Gemini CLI, GitHub, Vercel을 연결해  
+가벼운 모바일 AI 코딩 워크플로를 만드는 과정을 정리한 온보딩 가이드입니다.
+
+단순 설치법이라기보다,  
+“폰 하나로 작은 웹 프로젝트를 수정하고, 확인하고, 배포하는 루프”를 만드는 데 초점을 둡니다.
+
+---
+
+## Who is this for?
+
+이 문서는 이런 사람에게 적합합니다.
+
+- Gemini CLI를 처음 써보는 사람
+- Termux에서 개발환경을 만들어보고 싶은 사람
+- 노트북 없이 모바일에서 작은 웹 프로젝트를 수정해보고 싶은 사람
+- GitHub와 Vercel을 연결해 자동 배포 흐름을 경험해보고 싶은 사람
+- AI coding agent를 실제 작업 루프로 써보고 싶은 사람
+
+---
+
+## Tested Environment
+
+제가 테스트한 환경은 다음과 같습니다.
+
+- Device: Samsung Galaxy S23
+- OS: Android
+- Terminal: Termux
+- AI Coding Agent: Gemini CLI
+- Version Control: Git / GitHub
+- Deploy: Vercel
+- Frontend Example: Vite + React
+
+---
+
+## Overall Workflow
+
+전체 흐름은 다음과 같습니다.
+
+```text
+Android Phone
+  ↓
+Termux
+  ↓
+Gemini CLI
+  ↓
+Local Project
+  ↓
+Git / GitHub
+  ↓
+Vercel
+  ↓
+Mobile Browser QA
+
+  967  cat > README.md <<'EOF'
+# 안드로이드 폰으로 AI 코딩 작업대 만들기
+
+> Android Phone as an AI Coding Workstation  
+> Termux + Gemini CLI + GitHub + Vercel 모바일 개발환경 온보딩 가이드
+
+이 문서는 안드로이드 스마트폰에서 Termux, Gemini CLI, GitHub, Vercel을 연결해  
+가벼운 모바일 AI 코딩 워크플로를 만드는 과정을 정리한 온보딩 가이드입니다.
+
+단순 설치법이라기보다,  
+“폰 하나로 작은 웹 프로젝트를 수정하고, 확인하고, 배포하는 루프”를 만드는 데 초점을 둡니다.
+
+---
+
+## Who is this for?
+
+이 문서는 이런 사람에게 적합합니다.
+
+- Gemini CLI를 처음 써보는 사람
+- Termux에서 개발환경을 만들어보고 싶은 사람
+- 노트북 없이 모바일에서 작은 웹 프로젝트를 수정해보고 싶은 사람
+- GitHub와 Vercel을 연결해 자동 배포 흐름을 경험해보고 싶은 사람
+- AI coding agent를 실제 작업 루프로 써보고 싶은 사람
+
+---
+
+## Tested Environment
+
+제가 테스트한 환경은 다음과 같습니다.
+
+- Device: Samsung Galaxy S23
+- OS: Android
+- Terminal: Termux
+- AI Coding Agent: Gemini CLI
+- Version Control: Git / GitHub
+- Deploy: Vercel
+- Frontend Example: Vite + React
+
+---
+
+## Overall Workflow
+
+전체 흐름은 다음과 같습니다.
+
+```text
+Android Phone
+  ↓
+Termux
+  ↓
+Gemini CLI
+  ↓
+Local Project
+  ↓
+Git / GitHub
+  ↓
+Vercel
+  ↓
+Mobile Browser QA
+EOF
+
+  968  git add README.md
+  969  git commit -m "Add mobile AI coding workstation guide"
+  970  git push
+  971  cd mobile-ai-coding-workstation
+  972  cat > README.md <<'EOF'
+# 안드로이드 폰으로 AI 코딩 작업대 만들기
+
+> Android Phone as an AI Coding Workstation  
+> Termux + Gemini CLI + GitHub + Vercel 모바일 개발환경 온보딩 가이드
+
+이 문서는 안드로이드 스마트폰에서 Termux, Gemini CLI, GitHub, Vercel을 연결해  
+가벼운 모바일 AI 코딩 워크플로를 만드는 과정을 정리한 온보딩 가이드입니다.
+
+단순 설치법이라기보다,  
+“폰 하나로 작은 웹 프로젝트를 수정하고, 확인하고, 배포하는 루프”를 만드는 데 초점을 둡니다.
+
+---
+
+## Who is this for?
+
+이 문서는 이런 사람에게 적합합니다.
+
+- Gemini CLI를 처음 써보는 사람
+- Termux에서 개발환경을 만들어보고 싶은 사람
+- 노트북 없이 모바일에서 작은 웹 프로젝트를 수정해보고 싶은 사람
+- GitHub와 Vercel을 연결해 자동 배포 흐름을 경험해보고 싶은 사람
+- AI coding agent를 실제 작업 루프로 써보고 싶은 사람
+
+---
+
+## Tested Environment
+
+제가 테스트한 환경은 다음과 같습니다.
+
+- Device: Samsung Galaxy S23
+- OS: Android
+- Terminal: Termux
+- AI Coding Agent: Gemini CLI
+- Version Control: Git / GitHub
+- Deploy: Vercel
+- Frontend Example: Vite + React
+
+---
+
+## Overall Workflow
+
+전체 흐름은 다음과 같습니다.
+
+```text
+Android Phone
+  ↓
+Termux
+  ↓
+Gemini CLI
+  ↓
+Local Project
+  ↓
+Git / GitHub
+  ↓
+Vercel
+  ↓
+Mobile Browser QA
+EOF
+
+  973  git add README.md
+  974  git commit -m "Add mobile AI coding workstation guide"
+  975  git push
+  976  cd ~/workbox/mobile-ai-coding-workstation
+  977  cd ~/workbox
+  978  git clone https://github.com/YOUR_ID/mobile-ai-coding-workstation.git
+  979  cd mobile-ai-coding-workstation
+  980  cd ~/workbox
+  981  git clone https://github.com/YOUR_ID/mobile-ai-coding-workstation.git
+  982  cd mobile-ai-coding-workstation
+  983  git clone https://github.com/nevlock59-langlock/mobile-ai-coding-workstation.git
+  984  cat > README.md <<'EOF'
+# 안드로이드 폰으로 AI 코딩 작업대 만들기
+
+> Android Phone as an AI Coding Workstation  
+> Termux + Gemini CLI + GitHub + Vercel 모바일 개발환경 온보딩 가이드
+
+이 문서는 안드로이드 스마트폰에서 Termux, Gemini CLI, GitHub, Vercel을 연결해  
+가벼운 모바일 AI 코딩 워크플로를 만드는 과정을 정리한 온보딩 가이드입니다.
+
+단순 설치법이라기보다,  
+“폰 하나로 작은 웹 프로젝트를 수정하고, 확인하고, 배포하는 루프”를 만드는 데 초점을 둡니다.
+
+---
+
+## Who is this for?
+
+이 문서는 이런 사람에게 적합합니다.
+
+- Gemini CLI를 처음 써보는 사람
+- Termux에서 개발환경을 만들어보고 싶은 사람
+- 노트북 없이 모바일에서 작은 웹 프로젝트를 수정해보고 싶은 사람
+- GitHub와 Vercel을 연결해 자동 배포 흐름을 경험해보고 싶은 사람
+- AI coding agent를 실제 작업 루프로 써보고 싶은 사람
+
+---
+
+## Tested Environment
+
+제가 테스트한 환경은 다음과 같습니다.
+
+- Device: Samsung Galaxy S23
+- OS: Android
+- Terminal: Termux
+- AI Coding Agent: Gemini CLI
+- Version Control: Git / GitHub
+- Deploy: Vercel
+- Frontend Example: Vite + React
+
+---
+
+## Overall Workflow
+
+전체 흐름은 다음과 같습니다.
+
+```text
+Android Phone
+  ↓
+Termux
+  ↓
+Gemini CLI
+  ↓
+Local Project
+  ↓
+Git / GitHub
+  ↓
+Vercel
+  ↓
+Mobile Browser QA
+EOF
+
+  985  cd ~/workbox
+  986  mkdir mobile-ai-coding-workstation
+  987  mv README.md mobile-ai-coding-workstation/
+  988  cd mobile-ai-coding-workstation
+  989  git init
+  990  git add README.md
+  991  git commit -m "Add mobile AI coding workstation guide"
+  992  git branch -M main
+  993  git remote add origin https://github.com/nevlock59-langlock/mobile-ai-coding-workstation.git
+  994  git push -u origin main
+  995  cat >> README.md <<'EOF'
+
+## First 10-Minute Goal
+
+처음부터 큰 앱을 만들려고 하기보다, 아래 목표 하나만 먼저 성공시키는 것을 추천합니다.
+
+1. Termux에서 프로젝트 폴더로 이동한다.
+2. Gemini CLI를 실행한다.
+3. README나 작은 문구 하나를 수정한다.
+4. `npm run dev -- --host 0.0.0.0`으로 로컬 실행한다.
+5. 모바일 브라우저에서 결과를 확인한다.
+6. GitHub에 push한다.
+7. Vercel 배포 결과를 다시 모바일에서 확인한다.
+
+처음 목표는 “멋진 앱 만들기”가 아니라,  
+**수정 → 확인 → 저장 → 배포** 루프를 한 번 끝까지 돌려보는 것입니다.
+EOF
+
+  996  git add README.md
+  997  git commit -m "Add first 10-minute goal"
+  998  git push
+  999  cat >> README.md <<'EOF'
+
+## Quick Setup
+
+### 1. Install Termux
+
+- Install Termux from F-Droid
+- Launch Termux once
+
+### 2. Install basic packages
+
+EOF
+
+ 1000  cat >> README.md <<'EOF'
+```bash
+pkg update && pkg upgrade -y
+pkg install git nodejs -y
+```
+
+### 3. Install Gemini CLI
+
+```bash
+npm install -g @google/gemini-cli
+```
+
+EOF
+
+ 1001  cat >> README.md <<'EOF'
+### 4. Create workspace
+
+```bash
+mkdir -p ~/workbox
+cd ~/workbox
+```
+
+### 5. Start Gemini CLI
+
+```bash
+gemini
+```
+
+이후 Gemini CLI 안에서 프로젝트 생성/수정 작업을 진행할 수 있습니다.
+EOF
+
+ 1002  git add README.md
+ 1003  git commit -m "Add quick setup section"
+ 1004  git push
+ 1005  cat >> README.md <<'EOF'
+
+## Run a Vite Project on Android
+
+Vite 기반 프로젝트라면 프로젝트 폴더 안에서 아래 명령어를 실행합니다.
+
+```bash
+npm install
+npm run dev -- --host 0.0.0.0
+```
+EOF
+
+ 1006  cat >> README.md <<'EOF'
+
+실행 후 Termux에 표시되는 주소를 모바일 브라우저에서 엽니다.
+
+```text
+Local:   http://localhost:5173/
+Network: http://xxx.xxx.xxx.xxx:5173/
+```
+EOF
+
+ 1007  cat >> README.md <<'EOF'
+
+처음에는 배포보다 로컬 실행을 먼저 확인하는 것이 좋습니다.  
+로컬에서 화면이 뜨면 그다음 GitHub push와 Vercel 배포로 넘어갑니다.
+EOF
+
+ 1008  git add README.md
+ 1009  git commit -m "Add Vite run section"
+ 1010  git push
+ 1011  cat >> README.md <<'EOF'
+
+## GitHub Push Workflow
+
+수정한 내용을 GitHub에 올리는 기본 흐름입니다.
+
+```bash
+git status
+git add .
+git commit -m "update"
+git push
+```
+EOF
+
+ 1012  git add README.md
+ 1013  git commit -m "Add GitHub push workflow"
+ 1014  git push
+ 1015  cat >> README.md <<'EOF'
+
+## Vercel Deploy Workflow
+
+Vercel에서 GitHub repository를 연결하면, 이후에는 GitHub에 push할 때마다 자동으로 배포됩니다.
+
+```text
+Code 수정
+  ↓
+git add / commit / push
+EOF
+
+ 1016  cat >> README.md <<'EOF'
+  ↓
+GitHub 반영
+  ↓
+Vercel 자동 배포
+  ↓
+모바일 브라우저에서 확인
+```
+EOF
+
+ 1017  cat >> README.md <<'EOF'
+
+모바일에서 개발할 때는 배포 후 실제 스마트폰 브라우저에서 바로 확인할 수 있다는 점이 큰 장점입니다.
+EOF
+
+ 1018  git add README.md
+ 1019  git commit -m "Add Vercel deploy workflow"
+ 1020  git push
+ 1021  cat >> README.md <<'EOF'
+
+## Useful Aliases
+
+자주 쓰는 명령어는 alias로 줄여두면 편합니다.
+
+```bash
+echo 'alias gemw="cd ~/workbox && gemini"' >> ~/.bashrc
+source ~/.bashrc
+EOF
+
+ 1022  cat >> README.md <<'EOF'
+
+이후 어디서든 아래처럼 입력하면 됩니다.
+
+```bash
+gemw
+EOF
+
+ 1023  echo '' >> README.md
+ 1024  echo '그러면 `~/workbox` 폴더로 이동한 뒤 Gemini CLI가 실행됩니다.' >> README.md
+ 1025  git add README.md
+ 1026  git commit -m "Add useful aliases"
+ 1027  git push
+ 1028  echo '' >> README.md
+ 1029  echo '## Good Use Cases' >> README.md
+ 1030  echo '' >> README.md
+ 1031  echo '- 작은 UI 수정' >> README.md
+ 1032  echo '- CSS 위치 조정' >> README.md
+ 1033  echo '- 모바일 레이아웃 확인' >> README.md
+ 1034  echo '- 문구 수정' >> README.md
+ 1035  echo '- README 작성' >> README.md
+ 1036  echo '- 메타태그 / OG 이미지 수정' >> README.md
+ 1037  echo '- 짧은 기능 추가' >> README.md
+ 1038  echo '- 배포 후 모바일 실기기 QA' >> README.md
+ 1039  echo '' >> README.md
+ 1040  echo '## Limitations' >> README.md
+ 1041  echo '' >> README.md
+ 1042  echo '- 긴 코드 직접 입력' >> README.md
+ 1043  echo '- 여러 파일 동시 비교' >> README.md
+ 1044  echo '- 큰 구조의 리팩토링' >> README.md
+ 1045  echo '- 복잡한 런타임 디버깅' >> README.md
+ 1046  echo '- 긴 diff 검토' >> README.md
+ 1047  echo '- 원인 위치가 불명확한 오류 추적' >> README.md
+ 1048  git add README.md
+ 1049  git commit -m "Add use cases and limitations"
+ 1050  git push
+ 1051  echo '' >> README.md
+ 1052  echo '## Common Issues' >> README.md
+ 1053  echo '' >> README.md
+ 1054  echo '### Gemini CLI가 엉뚱한 폴더를 보는 경우' >> README.md
+ 1055  echo '' >> README.md
+ 1056  echo '수정하려는 프로젝트 폴더 안에서 Gemini CLI를 실행합니다.' >> README.md
+ 1057  echo '' >> README.md
+ 1058  echo '```bash' >> README.md
+ 1059  echo 'cd ~/workbox/YOUR_REPOSITORY' >> README.md
+ 1060  echo 'gemini' >> README.md
+ 1061  echo '```' >> README.md
+ 1062  echo '' >> README.md
+ 1063  echo '### Vite 서버는 켜졌는데 브라우저에서 안 열리는 경우' >> README.md
+ 1064  echo '' >> README.md
+ 1065  echo 'Vite 실행 시 --host 옵션을 붙입니다.' >> README.md
+ 1066  echo '' >> README.md
+ 1067  echo '```bash' >> README.md
+ 1068  echo 'npm run dev -- --host 0.0.0.0' >> README.md
+ 1069  echo '```' >> README.md
+ 1070  git add README.md
+ 1071  git commit -m "Add common issues"
+ 1072  git push
+ 1073  echo '' >> README.md
+ 1074  echo '## Conclusion' >> README.md
+ 1075  echo '' >> README.md
+ 1076  echo '이 방식은 완전한 모바일 IDE라기보다는,' >> README.md
+ 1077  echo 'AI agent + Git + cloud deploy를 스마트폰에서 연결해 돌리는 가벼운 모바일 바이브코딩 루프에 가깝습니다.' >> README.md
+ 1078  echo '' >> README.md
+ 1079  echo '모바일은 완벽한 개발환경은 아니지만,' >> README.md
+ 1080  echo '작은 수정 → 즉시 확인 → 빠른 배포가 중요한 작업에서는 생각보다 충분히 실용적이었습니다.' >> README.md
+ 1081  echo '' >> README.md
+ 1082  echo '## Keywords' >> README.md
+ 1083  echo '' >> README.md
+ 1084  echo 'Android, Termux, Gemini CLI, GitHub, Vercel, Vite, React, Mobile Development, AI Coding Agent, Mobile Coding, Vibe Coding' >> README.md
+ 1085  git add README.md
+ 1086  git commit -m "Add conclusion and keywords"
+ 1087  git push
+ 1088  sed -i 's/작업대/Workstation(작업대)/g' README.md
+ 1089  git add README.md
+ 1090  git commit -m "Replace 작업대 with Workstation terminology"
+ 1091  git push
+ 1092  git add README.md
+ 1093  git commit -m "Replace 작업대 with Workstation terminology"
+ 1094  git push
+ 1095  cd ~/workbox/mobile-ai-coding-workstation
+ 1096  python - <<'PY'
+from pathlib import Path
+
+p = Path("README.md")
+text = p.read_text()
+
+# 제목 정리
+text = text.replace(
+    "# 안드로이드 폰으로 AI 코딩 Workstation(작업대) 만들기",
+    "# 안드로이드 폰으로 만드는 AI 코딩 워크스테이션"
+)
+
+# 흔한 깨짐: 닫히지 않은 코드블록 뒤에 섹션 제목이 들어간 경우 보정
+text = text.replace(
+    "git add / commit / push\n## Useful Aliases",
+    "git add / commit / push\n```\n\n## Useful Aliases"
+)
+
+text = text.replace(
+    "git add / commit / push\n## Good Use Cases",
+    "git add / commit / push\n```\n\n## Good Use Cases"
+)
+
+text = text.replace(
+    "npm run dev -- --host 0.0.0.0\n## GitHub Push Workflow",
+    "npm run dev -- --host 0.0.0.0\n```\n\n## GitHub Push Workflow"
+)
+
+p.write_text(text)
+PY
+
+ 1097  grep -n '```' README.md
+ 1098  grep -c '```' README.md
+ 1099  python - <<'PY'
+from pathlib import Path
+
+p = Path("README.md")
+lines = p.read_text().splitlines()
+
+# 83번째 줄 바로 앞에 ``` 삽입
+lines.insert(82, "```")
+
+p.write_text("\n".join(lines) + "\n")
+PY
+
+ 1100  git add README.md
+ 1101  git commit -m "Close broken code block"
+ 1102  git push
+ 1103  python - <<'PY'
+from pathlib import Path
+
+p = Path("README.md")
+text = p.read_text()
+
+text = text.replace(
+    "Mobile Browser QA\n\n## First 10-Minute Goal",
+    "Mobile Browser QA\n```\n\n## First 10-Minute Goal"
+)
+
+p.write_text(text)
+PY
+
+ 1104  git add README.md
+ 1105  git commit -m "Fix workflow code block"
+ 1106  git push
+ 1107  python - <<'PY'
+from pathlib import Path
+
+p = Path("README.md")
+text = p.read_text()
+
+text = text.replace(
+    "source ~/.bashrc\n\n이후 어디서든 아래처럼 입력하면 됩니다.",
+    "source ~/.bashrc\n```\n\n이후 어디서든 아래처럼 입력하면 됩니다."
+)
+
+text = text.replace(
+    "```bash\ngemw\n\n그러면",
+    "```bash\ngemw\n```\n\n그러면"
+)
+
+p.write_text(text)
+PY
+
+ 1108  git add README.md
+ 1109  git commit -m "Fix alias code blocks"
+ 1110  git push
+ 1111  python - <<'PY'
+from pathlib import Path
+p=Path("README.md")
+s=p.read_text()
+a=s.index("## Conclusion")
+b=s.index("## Keywords")
+p.write_text(s[:a]+s[b:])
+PY
+
+ 1112  echo '' >> README.md
+ 1113  echo '## Conclusion' >> README.md
+ 1114  echo '' >> README.md
+ 1115  echo '이 방식은 완전한 모바일 IDE를 만드는 방법은 아닙니다.' >> README.md
+ 1116  echo '' >> README.md
+ 1117  echo '대신 AI agent, Git, cloud deploy, Mobile QA를 스마트폰에서 가볍게 연결하는 방법에 가깝습니다.' >> README.md
+ 1118  echo '' >> README.md
+ 1119  echo '모바일은 완벽한 개발환경은 아니지만,' >> README.md
+ 1120  echo '작게 수정하고 바로 확인해야 하는 작업에서는 충분히 실용적이었습니다.' >> README.md
+ 1121  echo '' >> README.md
+ 1122  echo '**핵심은 “폰으로 모든 개발을 한다”가 아니라,' >> README.md
+ 1123  echo '작은 수정 루프를 어디서든 굴릴 수 있다는 점입니다.**' >> README.md
+ 1124  python - <<'PY'
+from pathlib import Path
+p=Path("README.md")
+s=p.read_text()
+a=s.index("## Conclusion")
+p.write_text(s[:a].rstrip()+"\n")
+PY
+
+ 1125  echo '' >> README.md
+ 1126  echo '## Conclusion' >> README.md
+ 1127  echo '' >> README.md
+ 1128  echo '이 방식은 완전한 모바일 IDE를 만드는 방법은 아닙니다.' >> README.md
+ 1129  echo '' >> README.md
+ 1130  echo '대신 AI agent, Git, cloud deploy, Mobile QA를 스마트폰에서 가볍게 연결하는 방법에 가깝습니다.' >> README.md
+ 1131  echo '' >> README.md
+ 1132  echo '모바일은 완벽한 개발환경은 아니지만,' >> README.md
+ 1133  echo '작게 수정하고 바로 확인해야 하는 작업에서는 충분히 실용적이었습니다.' >> README.md
+ 1134  echo '' >> README.md
+ 1135  echo '**핵심은 “폰으로 모든 개발을 한다”가 아니라,' >> README.md
+ 1136  echo '작은 수정 루프를 어디서든 굴릴 수 있다는 점입니다.**' >> README.md
+ 1137  echo '' >> README.md
+ 1138  echo '## Keywords' >> README.md
+ 1139  echo '' >> README.md
+ 1140  echo 'Android, Termux, Gemini CLI, GitHub, Vercel, Vite, React, Mobile Development, AI Coding Agent, Mobile Coding, Vibe Coding' >> README.md
+ 1141  sed -i 's/작은 수정 루프/코드 수정-확인 사이클/g' README.md
+ 1142  git add README.md
+ 1143  git commit -m "Refine conclusion wording"
+ 1144  git push
+ 1145  echo '' >> README.md
+ 1146  echo '## Prerequisites' >> README.md
+ 1147  echo '' >> README.md
+ 1148  echo '- GitHub account' >> README.md
+ 1149  echo '- Vercel account' >> README.md
+ 1150  echo '- Gemini CLI authentication' >> README.md
+ 1151  echo '- Android smartphone' >> README.md
+ 1152  echo '- Internet connection' >> README.md
+ 1153  echo '' >> README.md
+ 1154  echo '## Troubleshooting' >> README.md
+ 1155  echo '' >> README.md
+ 1156  echo '### git push authentication failed' >> README.md
+ 1157  echo '' >> README.md
+ 1158  echo 'GitHub may require a Personal Access Token instead of a password.' >> README.md
+ 1159  echo '' >> README.md
+ 1160  echo '### npm install failed' >> README.md
+ 1161  echo '' >> README.md
+ 1162  echo 'Try updating Termux packages first.' >> README.md
+ 1163  echo '' >> README.md
+ 1164  echo '```bash' >> README.md
+ 1165  echo 'pkg update && pkg upgrade -y' >> README.md
+ 1166  echo '```' >> README.md
+ 1167  echo '' >> README.md
+ 1168  echo '### Gemini CLI opened the wrong folder' >> README.md
+ 1169  echo '' >> README.md
+ 1170  echo 'Run Gemini CLI inside the target project folder.' >> README.md
+ 1171  git add README.md
+ 1172  git commit -m "Add prerequisites and troubleshooting"
+ 1173  git push
+ 1174  cd ~/workbox/mobile-ai-coding-workstation
+ 1175  git status
+ 1176  git stash
+ 1177  git pull
+ 1178  git stash pop
+ 1179  git pull
+ 1180  git pull --rebase
+ 1181  git status
+ 1182  grep -n 'Prerequisites\|Troubleshooting\|git push authentication\|npm install failed' README.md
+ 1183  git status
+ 1184  git push
+ 1185  touch README.en.md
+ 1186  cd ~/workbox/mobile-ai-coding-workstation
+ 1187  rm -f README.en.md
+ 1188  echo '# Android Phone as an AI Coding Workstation' >> README.en.md
+ 1189  echo '' >> README.en.md
+ 1190  echo '> Termux + Gemini CLI + GitHub + Vercel mobile onboarding guide' >> README.en.md
+ 1191  echo '' >> README.en.md
+ 1192  echo 'This repository is a beginner-friendly guide for building a lightweight mobile AI coding workflow on Android.' >> README.en.md
+ 1193  echo '' >> README.en.md
+ 1194  echo 'The goal is not to replace a full desktop IDE.' >> README.en.md
+ 1195  echo 'The goal is to create a small code edit-check cycle on a phone.' >> README.en.md
+ 1196  echo '' >> README.en.md
+ 1197  echo '## Tested Environment' >> README.en.md
+ 1198  echo '' >> README.en.md
+ 1199  echo '- Samsung Galaxy S23' >> README.en.md
+ 1200  echo '- Android' >> README.en.md
+ 1201  echo '- Termux' >> README.en.md
+ 1202  echo '- Gemini CLI' >> README.en.md
+ 1203  echo '- GitHub' >> README.en.md
+ 1204  echo '- Vercel' >> README.en.md
+ 1205  echo '- Vite + React' >> README.en.md
+ 1206  echo '' >> README.en.md
+ 1207  echo '## Quick Setup' >> README.en.md
+ 1208  echo '' >> README.en.md
+ 1209  echo '```bash' >> README.en.md
+ 1210  echo 'pkg update && pkg upgrade -y' >> README.en.md
+ 1211  echo 'pkg install git nodejs -y' >> README.en.md
+ 1212  echo 'mkdir -p ~/workbox' >> README.en.md
+ 1213  echo 'cd ~/workbox' >> README.en.md
+ 1214  echo 'npm install -g @google/gemini-cli' >> README.en.md
+ 1215  echo 'gemini' >> README.en.md
+ 1216  echo '```' >> README.en.md
+ 1217  echo '' >> README.en.md
+ 1218  echo '## Useful Alias' >> README.en.md
+ 1219  echo '' >> README.en.md
+ 1220  echo '```bash' >> README.en.md
+ 1221  echo 'echo '"'"'alias gemw="cd ~/workbox && gemini"'"'"' >> ~/.bashrc' >> README.en.md
+ 1222  echo 'source ~/.bashrc' >> README.en.md
+ 1223  echo '```' >> README.en.md
+ 1224  echo '' >> README.en.md
+ 1225  echo 'After this, run:' >> README.en.md
+ 1226  echo '' >> README.en.md
+ 1227  echo '```bash' >> README.en.md
+ 1228  echo 'gemw' >> README.en.md
+ 1229  echo '```' >> README.en.md
+ 1230  echo '' >> README.en.md
+ 1231  echo '## Run a Vite Project' >> README.en.md
+ 1232  echo '' >> README.en.md
+ 1233  echo '```bash' >> README.en.md
+ 1234  echo 'npm install' >> README.en.md
+ 1235  echo 'npm run dev -- --host 0.0.0.0' >> README.en.md
+ 1236  echo '```' >> README.en.md
+ 1237  echo '' >> README.en.md
+ 1238  echo 'Open the Local or Network URL in your mobile browser.' >> README.en.md
+ 1239  echo '' >> README.en.md
+ 1240  echo '## GitHub Push Workflow' >> README.en.md
+ 1241  echo '' >> README.en.md
+ 1242  echo '```bash' >> README.en.md
+ 1243  echo 'git status' >> README.en.md
+ 1244  echo 'git add .' >> README.en.md
+ 1245  echo 'git commit -m "update"' >> README.en.md
+ 1246  echo 'git push' >> README.en.md
+ 1247  echo '```' >> README.en.md
+ 1248  echo '' >> README.en.md
+ 1249  echo '## Vercel Deploy Workflow' >> README.en.md
+ 1250  echo '' >> README.en.md
+ 1251  echo 'Connect your GitHub repository to Vercel.' >> README.en.md
+ 1252  echo 'After that, every git push can trigger an automatic deployment.' >> README.en.md
+ 1253  echo '' >> README.en.md
+ 1254  echo '## Good Use Cases' >> README.en.md
+ 1255  echo '' >> README.en.md
+ 1256  echo '- Small UI updates' >> README.en.md
+ 1257  echo '- CSS tweaks' >> README.en.md
+ 1258  echo '- Mobile layout checks' >> README.en.md
+ 1259  echo '- README editing' >> README.en.md
+ 1260  echo '- Quick deployment QA' >> README.en.md
+ 1261  echo '- Small feature patches' >> README.en.md
+ 1262  echo '' >> README.en.md
+ 1263  echo '## Limitations' >> README.en.md
+ 1264  echo '' >> README.en.md
+ 1265  echo '- Large refactoring' >> README.en.md
+ 1266  echo '- Long debugging sessions' >> README.en.md
+ 1267  echo '- Multi-file comparison' >> README.en.md
+ 1268  echo '- Heavy desktop-style workflows' >> README.en.md
+ 1269  echo '' >> README.en.md
+ 1270  echo '## Conclusion' >> README.en.md
+ 1271  echo '' >> README.en.md
+ 1272  echo 'This setup is not a full mobile IDE.' >> README.en.md
+ 1273  echo '' >> README.en.md
+ 1274  echo 'It is a lightweight workflow that connects AI agent, Git, cloud deploy, and mobile QA for fast code edit-check cycles on Android.' >> README.en.md
+ 1275  echo '' >> README.en.md
+ 1276  echo '## Keywords' >> README.en.md
+ 1277  echo '' >> README.en.md
+ 1278  echo 'Android, Termux, Gemini CLI, GitHub, Vercel, Mobile Development, AI Coding Agent' >> README.en.md
+ 1279  grep -n '```' README.en.md
+ 1280  grep -c '```' README.en.md
+ 1281  git add README.en.md
+ 1282  git commit -m "Add English README"
+ 1283  git push
+ 1284  python - <<'PY'
+from pathlib import Path
+
+p = Path("README.md")
+s = p.read_text()
+
+link = "[English Version](README.en.md)\n\n"
+
+if "README.en.md" not in s:
+    lines = s.splitlines()
+    lines.insert(2, "")
+    lines.insert(3, link.strip())
+    p.write_text("\n".join(lines) + "\n")
+PY
+
+ 1285  head -8 README.md
+ 1286  git add README.md
+ 1287  git commit -m "Link English README"
+ 1288  git push
+ 1289  cd ~/workbox/mobile-ai-coding-workstation
+ 1290  python - <<'PY'
+from pathlib import Path
+
+p = Path("README.md")
+s = p.read_text()
+
+# 1) 코드블록 개수 홀수면 맨 끝에 닫기
+if s.count("```") % 2 == 1:
+    s += "\n```\n"
+
+# 2) Keywords 섹션 전부 제거
+parts = s.split("## Keywords")
+if len(parts) > 1:
+    s = parts[0].rstrip() + "\n"
+
+# 3) Conclusion 섹션이 있으면 제거 후 맨 뒤에 재삽입
+if "## Conclusion" in s:
+    a = s.index("## Conclusion")
+    s = s[:a].rstrip() + "\n"
+
+conclusion = """
+## Conclusion
+
+이 방식은 완전한 모바일 IDE를 만드는 방법은 아닙니다.
+
+대신 AI agent, Git, cloud deploy, Mobile QA를 스마트폰에서 가볍게 연결하는 방법에 가깝습니다.
+
+모바일은 완벽한 개발환경은 아니지만,  
+작게 수정하고 바로 확인해야 하는 작업에서는 충분히 실용적이었습니다.
+
+**핵심은 “폰으로 모든 개발을 한다”가 아니라,  
+코드 수정-확인 사이클을 어디서든 굴릴 수 있다는 점입니다.**
+
+## Keywords
+
+Android, Termux, Gemini CLI, GitHub, Vercel, Vite, React, Mobile Development, AI Coding Agent, Mobile Coding, Vibe Coding
+"""
+
+p.write_text(s.rstrip() + "\n\n" + conclusion.lstrip())
+PY
+
+ 1291  git add README.md
+ 1292  git commit -m "Clean up README structure"
+ 1293  git push
+ 1294  cd ~/workbox/vibe-code-starter
+ 1295  mkdir -p no-install-html
+ 1296  cat > no-install-html/index.html <<'EOF'
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>No-install HTML MVP</title>
+</head>
+<body>
+  <h1>No-install HTML MVP</h1>
+  <p>npm install 없이 브라우저에서 바로 실행되는 단일 HTML MVP 템플릿입니다.</p>
+
+  <label for="userInput">Input</label>
+  <textarea id="userInput" rows="5" placeholder="내용을 입력하세요"></textarea>
+
+  <button id="runButton">Run</button>
+  <button id="resetButton">Reset</button>
+
+  <pre id="output">Result will appear here.</pre>
+
+  <script>
+    const userInput = document.getElementById("userInput");
+    const output = document.getElementById("output");
+
+    document.getElementById("runButton").addEventListener("click", () => {
+      const value = userInput.value.trim();
+      output.textContent = value
+        ? `Input received:\n\n${value}`
+        : "Please enter something first.";
+    });
+
+    document.getElementById("resetButton").addEventListener("click", () => {
+      userInput.value = "";
+      output.textContent = "Result will appear here.";
+    });
+  </script>
+</body>
+</html>
+EOF
+
+ 1297  git add no-install-html/index.html
+ 1298  git commit -m "Add no-install HTML MVP template"
+ 1299  git push
+ 1300  git push -u origin main
+ 1301  git checkout main
+ 1302  git pull origin main
+ 1303  git cherry-pick 0f60ef5
+ 1304  git push origin main
+ 1305  git branch -d fix-mvp-guidance
+ 1306  git branch -D fix-mvp-guidance
+ 1307  git checkout main
+ 1308  git pull origin main
+ 1309  git cherry-pick 0f60ef5
+ 1310  git push origin main
+ 1311  cd ~/workbox/vibe-code-starter
+ 1312  rm -f README.md
+ 1313  echo '# Vibe Code Starter' >> README.md
+ 1314  echo '' >> README.md
+ 1315  echo 'A lightweight MVP starter kit for vibe coding with AI coding agents such as Claude Code, Gemini CLI, and local/on-prem agents.' >> README.md
+ 1316  echo '' >> README.md
+ 1317  echo '이 저장소는 AI 코딩 에이전트와 함께 작은 MVP를 빠르게 만들기 위한 스타터킷입니다.' >> README.md
+ 1318  echo '' >> README.md
+ 1319  echo '## What this is' >> README.md
+ 1320  echo '' >> README.md
+ 1321  echo 'This is not a large framework.' >> README.md
+ 1322  echo '' >> README.md
+ 1323  echo 'It is a small starter kit for quickly choosing the right first project shape.' >> README.md
+ 1324  echo '' >> README.md
+ 1325  echo '- no-install-html: single-file browser MVP' >> README.md
+ 1326  echo '- local-tkinter: local PC / on-prem friendly desktop MVP' >> README.md
+ 1327  echo '- Vite/React: deployable web app MVP' >> README.md
+ 1328  echo '' >> README.md
+ 1329  echo '## MVP Principle' >> README.md
+ 1330  echo '' >> README.md
+ 1331  echo 'MVP does not mean a toy screen.' >> README.md
+ 1332  echo '' >> README.md
+ 1333  echo 'MVP means the smallest version where the core user flow works end-to-end.' >> README.md
+ 1334  echo '' >> README.md
+ 1335  echo 'A good MVP should let the user:' >> README.md
+ 1336  echo '' >> README.md
+ 1337  echo '1. enter or provide something' >> README.md
+ 1338  echo '2. run one clear action' >> README.md
+ 1339  echo '3. see a useful result' >> README.md
+ 1340  echo '4. reset or try again' >> README.md
+ 1341  echo '' >> README.md
+ 1342  echo '## Available Templates' >> README.md
+ 1343  echo '' >> README.md
+ 1344  echo '### no-install-html' >> README.md
+ 1345  echo '' >> README.md
+ 1346  echo 'Use this when you want the fastest local MVP.' >> README.md
+ 1347  echo '' >> README.md
+ 1348  echo '- No npm install' >> README.md
+ 1349  echo '- No build step' >> README.md
+ 1350  echo '- Open index.html directly in a browser' >> README.md
+ 1351  echo '- Good for quick UI and interaction checks' >> README.md
+ 1352  echo '' >> README.md
+ 1353  echo '### local-tkinter' >> README.md
+ 1354  echo '' >> README.md
+ 1355  echo 'Use this for local PC or on-prem workflows.' >> README.md
+ 1356  echo '' >> README.md
+ 1357  echo '- Python-based local GUI' >> README.md
+ 1358  echo '- Good for internal tools' >> README.md
+ 1359  echo '- Good for local/on-prem API workflows' >> README.md
+ 1360  echo '- Do not expose API keys in frontend code' >> README.md
+ 1361  echo '' >> README.md
+ 1362  echo '### Vite/React' >> README.md
+ 1363  echo '' >> README.md
+ 1364  echo 'Use this when the MVP may grow into a deployable web app.' >> README.md
+ 1365  echo '' >> README.md
+ 1366  echo '- Requires npm install' >> README.md
+ 1367  echo '- Good for frontend apps' >> README.md
+ 1368  echo '- Good for Vercel or web deployment' >> README.md
+ 1369  echo '' >> README.md
+ 1370  echo '## Agent Guidance' >> README.md
+ 1371  echo '' >> README.md
+ 1372  echo 'Before starting a new project, ask:' >> README.md
+ 1373  echo '' >> README.md
+ 1374  echo '> Do you want to use this starter kit as the base, or should I adapt the current project structure?' >> README.md
+ 1375  echo '' >> README.md
+ 1376  echo 'Do not assume this starter kit should always be used.' >> README.md
+ 1377  echo '' >> README.md
+ 1378  echo 'If the user says yes:' >> README.md
+ 1379  echo '' >> README.md
+ 1380  echo '- use this starter kit workflow' >> README.md
+ 1381  echo '- choose the right template for the target environment' >> README.md
+ 1382  echo '- keep the first version lightweight but end-to-end usable' >> README.md
+ 1383  echo '' >> README.md
+ 1384  echo 'If the user says no:' >> README.md
+ 1385  echo '' >> README.md
+ 1386  echo '- preserve the existing project structure' >> README.md
+ 1387  echo '- apply only the MVP principles where helpful' >> README.md
+ 1388  echo '' >> README.md
+ 1389  echo '## Security Notes' >> README.md
+ 1390  echo '' >> README.md
+ 1391  echo '- Do not hardcode API keys' >> README.md
+ 1392  echo '- Do not expose secrets in browser-side JavaScript' >> README.md
+ 1393  echo '- For local or on-prem API calls, prefer environment variables or local config files excluded from Git' >> README.md
+ 1394  echo '- Keep internal endpoints, app IDs, and credentials out of public repositories' >> README.md
+ 1395  echo '' >> README.md
+ 1396  echo '## Quick Start' >> README.md
+ 1397  echo '' >> README.md
+ 1398  echo 'For no-install HTML:' >> README.md
+ 1399  echo '' >> README.md
+ 1400  echo '```text' >> README.md
+ 1401  echo 'open no-install-html/index.html' >> README.md
+ 1402  echo '```' >> README.md
+ 1403  echo '' >> README.md
+ 1404  echo 'For Vite/React:' >> README.md
+ 1405  echo '' >> README.md
+ 1406  echo '```bash' >> README.md
+ 1407  echo 'npm install' >> README.md
+ 1408  echo 'npm run dev' >> README.md
+ 1409  echo '```' >> README.md
+ 1410  echo '' >> README.md
+ 1411  echo '## Conclusion' >> README.md
+ 1412  echo '' >> README.md
+ 1413  echo 'This starter kit is meant to reduce project-starting friction.' >> README.md
+ 1414  echo '' >> README.md
+ 1415  echo 'The goal is not to make the smallest possible screen.' >> README.md
+ 1416  echo 'The goal is to create the smallest useful end-to-end flow.' >> README.md
+ 1417  git add README.md
+ 1418  git commit -m "Replace autogenerated README with starter guide"
+ 1419  git push
+ 1420  cd ..
+ 1421  pkg list-installed > termux-installed-packages.txt
+ 1422  history > termux-history.txt
