@@ -1,0 +1,19 @@
+#!/data/data/com.termux/files/usr/bin/sh
+
+export HOME=/data/data/com.termux/files/home
+export PREFIX=/data/data/com.termux/files/usr
+export DISPLAY=:1
+export XKB_CONFIG_ROOT=$PREFIX/share/X11/xkb
+
+# Korean input method: fcitx5
+export XMODIFIERS=@im=fcitx
+export GTK_IM_MODULE=fcitx
+export QT_IM_MODULE=fcitx
+
+unset SESSION_MANAGER
+unset DBUS_SESSION_BUS_ADDRESS
+
+exec dbus-launch --exit-with-session sh -c '
+  fcitx5 -d
+  exec startxfce4
+'

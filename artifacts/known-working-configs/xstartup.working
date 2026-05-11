@@ -1,0 +1,11 @@
+#!/data/data/com.termux/files/usr/bin/sh
+
+export HOME=/data/data/com.termux/files/home
+export PREFIX=/data/data/com.termux/files/usr
+export DISPLAY=:1
+export XKB_CONFIG_ROOT=$PREFIX/share/X11/xkb
+
+unset SESSION_MANAGER
+unset DBUS_SESSION_BUS_ADDRESS
+
+exec dbus-launch --exit-with-session startxfce4
