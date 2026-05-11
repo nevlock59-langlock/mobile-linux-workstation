@@ -74,3 +74,13 @@ Visual traces from the mobile workstation recovery session.
 - Termux recovery session
 - VNC recovery traces
 - Mobile workstation workflow
+
+### Recovery screenshots
+
+![Termux home traces](screenshots/Screenshot_20260511_220800_Termux.jpg)
+
+![VNC scripts and boot clues](screenshots/Screenshot_20260511_220843_Termux.jpg)
+
+![Initial repository recovery](screenshots/Screenshot_20260511_221159_Termux.jpg)
+
+![RVNC Viewer desktop access](screenshots/Screenshot_20260511_224207_RVNC%20Viewer.jpg)
