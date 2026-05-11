@@ -96,3 +96,23 @@ Visual traces from the mobile workstation recovery session.
 3. Start or restart the VNC session using `vncstart.sh` or `vnc_restart.sh`.
 4. Connect from RVNC Viewer to `127.0.0.1:5901`.
 5. If recovery fails, inspect `~/vnc.log`, `vnc_restart.sh`, and the preserved `xstartup*.working` files.
+
+---
+
+## Recovery Notes
+
+This repository also keeps small recovery notes for rebuilding the mobile Linux workstation environment.
+
+- [Boot sequence](BOOT_SEQUENCE.md)
+- [Keyboard / input recovery](KEYBOARD_INPUT_RECOVERY.md)
+- [VNC start script](scripts/vncstart.sh)
+- [VNC restart script](scripts/vnc_restart.sh)
+
+Current known working flow:
+
+```text
+Termux
+→ start VNC
+→ connect with VNC Viewer at 127.0.0.1:5901
+→ use Xfce4 desktop
+```
