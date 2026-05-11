@@ -57,3 +57,12 @@ Instead of treating the phone as a weak desktop replacement, this setup evolved 
 - AI-assisted coding loop
 - Git-based deployment
 - cloud-assisted runtime workflow
+
+## Recovery notes
+
+- [Termux current state](docs/01-termux-current-state.md)
+- [Xfce4 recovery log](docs/02-xfce4-recovery-log.md)
+- [AI coding loop](docs/03-ai-coding-loop.md)
+- [Next recovery tasks](docs/04-next-recovery-tasks.md)
+- [Hardware / access recovery](docs/05-hardware-access-recovery.md)
+- [Boot sequence notes](docs/06-boot-sequence-notes.md)
