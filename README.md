@@ -66,3 +66,11 @@ Instead of treating the phone as a weak desktop replacement, this setup evolved 
 - [Next recovery tasks](docs/04-next-recovery-tasks.md)
 - [Hardware / access recovery](docs/05-hardware-access-recovery.md)
 - [Boot sequence notes](docs/06-boot-sequence-notes.md)
+
+## Screenshots
+
+Visual traces from the mobile workstation recovery session.
+
+- Termux recovery session
+- VNC recovery traces
+- Mobile workstation workflow
