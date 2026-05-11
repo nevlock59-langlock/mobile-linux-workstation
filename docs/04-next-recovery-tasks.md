@@ -1,19 +1,23 @@
 # Next Recovery Tasks
 
-## Recover
+This file tracks remaining recovery tasks after the initial archive.
 
-- Confirm how Xfce4 was launched
-- Confirm whether VNC or Termux:X11 was used
-- Check VNC startup scripts
+## Done
+
+- Confirmed VNC-based access
+- Confirmed RVNC Viewer as the viewer app
+- Preserved VNC startup and restart scripts
+- Documented boot sequence notes
+- Added recovery screenshots
+- Preserved runtime artifacts
+
+## Still useful later
+
+- Reconstruct the exact Xfce4 launch sequence
 - Check shell aliases and environment variables
-- Verify Python / Node / Git runtime versions
-
-## Document
-
-- Minimal setup path
-- Known working commands
-- Troubleshooting notes
-- Screenshots of the mobile desktop environment if available
+- Recover keyboard / shortcut / key mapping fixes
+- Verify which commands are still working on the current device
+- Add troubleshooting notes if the desktop is launched again
 
 ## Preserve
 
