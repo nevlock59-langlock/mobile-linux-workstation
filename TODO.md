@@ -1,0 +1,1 @@
+- keyboard/input recovery: fcitx5 설정은 xstartup에 있음. 실제 VNC 입력 테스트는 나중에 확인.

@@ -1,0 +1,3 @@
+recovery_logs/termux_state_*.txt
+recovery_logs/known_working_vnc_config_*.txt
+.vnc/
