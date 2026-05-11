@@ -84,3 +84,5 @@ Visual traces from the mobile workstation recovery session.
 ![Initial repository recovery](screenshots/Screenshot_20260511_221159_Termux.jpg)
 
 ![RVNC Viewer desktop access](screenshots/Screenshot_20260511_224207_RVNC%20Viewer.jpg)
+
+- [Known working VNC configs](docs/09-known-working-configs.md)
