@@ -88,3 +88,11 @@ Visual traces from the mobile workstation recovery session.
 
 ![RVNC Viewer desktop access](screenshots/Screenshot_20260511_224207_RVNC%20Viewer.jpg)
 
+
+## Quick Start Recovery
+
+1. Open Termux and move to the home directory.
+2. Check preserved known-working configs in `artifacts/known-working-configs/`.
+3. Start or restart the VNC session using `vncstart.sh` or `vnc_restart.sh`.
+4. Connect from RVNC Viewer to `127.0.0.1:5901`.
+5. If recovery fails, inspect `~/vnc.log`, `vnc_restart.sh`, and the preserved `xstartup*.working` files.
