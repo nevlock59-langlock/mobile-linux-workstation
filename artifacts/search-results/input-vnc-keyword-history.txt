@@ -1,0 +1,6 @@
+  <label for="userInput">Input</label>
+  <textarea id="userInput" rows="5" placeholder="내용을 입력하세요"></textarea>
+    const userInput = document.getElementById("userInput");
+      const value = userInput.value.trim();
+        ? `Input received:\n\n${value}`
+      userInput.value = "";

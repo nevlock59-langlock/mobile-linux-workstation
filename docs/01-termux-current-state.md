@@ -1,27 +1,55 @@
 # Termux Current State
 
-This document records the currently recovered Termux environment.
+This document records the currently recovered Android + Termux workstation environment.
 
-The goal is not to rebuild the smallest possible setup.
+The objective was not to rebuild the smallest possible setup.
 
-The goal is to preserve enough operational traces to reconstruct the workstation later.
+The objective was to preserve enough runtime evidence, startup behavior, and operational traces to reconstruct the workstation later if the device or environment becomes unavailable.
 
-## Confirmed
+This environment was also used as part of a mobile AI-assisted coding workflow involving:
 
-- Termux is installed and usable
-- Git push works
-- Python runtime exists
-- Node.js / npm runtime exists
-- Project workspace exists under `~/workbox`
+- Termux
+- Gemini CLI
+- GitHub
+- Vercel deployment
+- Android-based remote desktop interaction
 
-This environment was also used as part of a mobile AI-assisted coding workflow.
+# Confirmed runtime state
 
-## Saved artifacts
+The following components were confirmed to be operational during recovery:
 
-See `artifacts/` for:
-- package lists
-- runtime versions
-- backup file indexes
-- command history snapshots
+- Termux shell environment
+- Git push / remote repository workflow
+- Python runtime
+- Node.js / npm runtime
+- workspace structure under ~/workbox
+- VNC-based desktop access
+- Xfce4 runtime traces
 
-These artifacts are intended for future recovery and runtime archaeology.
+# Preserved recovery evidence
+
+Artifacts were intentionally preserved for future recovery and runtime archaeology.
+
+Saved evidence includes:
+
+- installed package snapshots
+- runtime version snapshots
+- backup archive indexes
+- shell history snapshots
+- VNC startup scripts
+- Xfce4 runtime traces
+- keyboard/input recovery clues
+
+See artifacts/ and docs/ for detailed recovery traces.
+
+# Recovery philosophy
+
+The recovery process prioritized:
+
+1. reproducibility
+2. operational continuity
+3. lightweight mobile tooling
+4. preservation of runtime behavior
+5. future rebuild capability
+6. AI-assisted workflow continuity
+

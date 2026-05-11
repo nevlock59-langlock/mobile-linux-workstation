@@ -66,6 +66,9 @@ Instead of treating the phone as a weak desktop replacement, this setup evolved 
 - [Next recovery tasks](docs/04-next-recovery-tasks.md)
 - [Hardware / access recovery](docs/05-hardware-access-recovery.md)
 - [Boot sequence notes](docs/06-boot-sequence-notes.md)
+- [Keyboard / input recovery](docs/08-keyboard-input-recovery.md)
+- [Known working VNC configs](docs/09-known-working-configs.md)
+
 
 ## Screenshots
 
@@ -85,4 +88,3 @@ Visual traces from the mobile workstation recovery session.
 
 ![RVNC Viewer desktop access](screenshots/Screenshot_20260511_224207_RVNC%20Viewer.jpg)
 
-- [Known working VNC configs](docs/09-known-working-configs.md)
